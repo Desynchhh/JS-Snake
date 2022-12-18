@@ -5,9 +5,8 @@ export class Snake {
         'DOWN': -1,
         'LEFT': -2
     }
-    constructor(x, y, canvasW, canvasH) {
-        this.canvasW = canvasW
-        this.canvasH = canvasH
+    constructor(x, y, game) {
+        this.game = game
         this.startDirection = this.directions.RIGHT
         this.startX = x
         this.startY = y
@@ -21,11 +20,10 @@ export class Snake {
         this.stepSize = this.h
         this.direction = this.startDirection
         this.winCondition = this.calcWinLength()
-        console.log(this.winCondition)
     }
 
     calcWinLength() {
-        const res = (this.canvasW * this.canvasH) / (this.h * this.w) - this.h 
+        const res = (this.game.width * this.game.height) / (this.h * this.w) - this.h 
         return res
     }
 
@@ -36,26 +34,22 @@ export class Snake {
         this.direction = this.startDirection
     }
 
-    checkHitWall(canvasWidth, canvasHeight) {
+    #checkHitWall() {
         if (this.y < 0) {
-            this.y = 0
             this.die()
         }
-        else if (this.x > canvasWidth - this.w) {
-            this.x = canvasWidth - this.w
+        else if (this.x > this.game.height - this.w) {
             this.die()
         }
-        else if (this.y + this.h > canvasHeight) {
-            this.y = canvasHeight - this.h
+        else if (this.y + this.h > this.game.height) {
             this.die()
         }
         else if (this.x < 0) {
-            this.x = 0
             this.die()
         }
     }
 
-    checkHitSelf() {
+    #checkHitSelf() {
         for(let body of this.body) {
             const xAlign = body.x == this.x
             const yAlign = body.y == this.y
@@ -105,26 +99,26 @@ export class Snake {
         this.body.unshift({ x, y })
     }
 
-    update(dt, keys, canvasW, canvasH) {
+    update(dt, keys) {
         this.setDirection(keys)
         this.timeSinceMove = this.timeSinceMove + dt
         if(this.timeSinceMove >= this.moveInterval) {
             this.body.push({'x': this.x, 'y': this.y})
             this.body.shift()
             this.move()
-            this.checkHitSelf()
-            this.checkHitWall(canvasW, canvasH)
+            this.#checkHitSelf()
+            this.#checkHitWall()
             this.timeSinceMove = 0
         }
     }
-
-    draw(ctx) {
+    
+    draw() {
         let fillStyle = '000000'
-        ctx.fillStyle = `#${fillStyle}`
-        ctx.fillRect(this.x, this.y, this.w, this.h)
+        this.game.ctx.fillStyle = `#${fillStyle}`
+        this.game.ctx.fillRect(this.x, this.y, this.w, this.h)
         for(const body of this.body) {
             console.log(fillStyle)
-            ctx.fillRect(body.x, body.y, this.w, this.h)
+            this.game.ctx.fillRect(body.x, body.y, this.w, this.h)
         }
     }
 }

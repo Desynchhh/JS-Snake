@@ -1,26 +1,25 @@
 export class Food {
-    constructor(canvasWidth, canvasHeight) {
-        this.canvasWidth = canvasWidth
-        this.canvasHeight = canvasHeight
+    constructor(game) {
+        this.game = game
         this.h = 20
         this.w = this.h
-        this.x = randomNumber(0, this.canvasWidth - this.w, this.h)
-        this.y = randomNumber(0, this.canvasHeight - this.h, this.h)
+        this.x = randomNumber(0, this.game.width - this.w, this.h)
+        this.y = randomNumber(0, this.game.height - this.h, this.h)
     }
 
     update(snake) {
         if(this.x == snake.x && this.y == snake.y) {
             if(randomNumber(0,1) < 1) {
-                this.y == randomNumber(0, this.canvasHeight - this.h, this.h)
+                this.y == randomNumber(0, this.game.height - this.h, this.h)
             } else {
-                this.x = randomNumber(0, this.canvasWidth - this.w, this.h)
+                this.x = randomNumber(0, this.game.width - this.w, this.h)
             }
         }
     }
 
-    draw(ctx) {
-        ctx.fillStyle = 'green'
-        ctx.fillRect(this.x, this.y, this.w, this.h)
+    draw() {
+        this.game.ctx.fillStyle = 'green'
+        this.game.ctx.fillRect(this.x, this.y, this.w, this.h)
     }
 }
 
