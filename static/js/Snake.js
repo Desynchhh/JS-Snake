@@ -5,11 +5,8 @@ export class Snake {
         'DOWN': -1,
         'LEFT': -2
     }
-    constructor(x, y, game) {
+    constructor(game, x, y) {
         this.game = game
-        this.startDirection = this.directions.RIGHT
-        this.startX = x
-        this.startY = y
         this.x = x
         this.y = y
         this.h = 20
@@ -17,36 +14,18 @@ export class Snake {
         this.body = []
         this.timeSinceMove = 0
         this.moveInterval = 100
+        this.isAlive = true
         this.stepSize = this.h
-        this.direction = this.startDirection
-        this.winCondition = this.calcWinLength()
+        this.direction = this.directions.RIGHT
     }
 
-    calcWinLength() {
-        const res = (this.game.width * this.game.height) / (this.h * this.w) - this.h 
-        return res
-    }
-
-    die() {
-        this.body = []
-        this.x = this.startX
-        this.y = this.startY
-        this.direction = this.startDirection
-    }
+    
 
     #checkHitWall() {
-        if (this.y < 0) {
-            this.die()
-        }
-        else if (this.x > this.game.height - this.w) {
-            this.die()
-        }
-        else if (this.y + this.h > this.game.height) {
-            this.die()
-        }
-        else if (this.x < 0) {
-            this.die()
-        }
+        if (this.y < 0) this.isAlive = false
+        else if (this.x > this.game.height - this.w) this.isAlive = false
+        else if (this.y + this.h > this.game.height) this.isAlive = false
+        else if (this.x < 0) this.isAlive = false
     }
 
     #checkHitSelf() {
@@ -54,7 +33,7 @@ export class Snake {
             const xAlign = body.x == this.x
             const yAlign = body.y == this.y
             if(xAlign && yAlign) {
-                this.die()
+                this.isAlive = false
                 return
             }
         }
@@ -108,6 +87,7 @@ export class Snake {
             this.move()
             this.#checkHitSelf()
             this.#checkHitWall()
+            this.game.checkReset()
             this.timeSinceMove = 0
         }
     }

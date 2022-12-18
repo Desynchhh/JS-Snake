@@ -9,8 +9,9 @@ export class Game {
         this.width = width
         this.height = height
         this.score = 0
-        this.snake = new Snake(240, 240, this)
+        this.snake = this.#spawnSnake()
         this.food = this.#spawnFood()
+        this.winCondition = this.#calcWinLength()
     }
 
     update(dt) {
@@ -40,6 +41,27 @@ export class Game {
         if(this.keys.includes(key)) {
             this.keys.splice(this.keys.indexOf(key), 1)
         }
+    }
+
+    checkReset() {
+        if(!this.snake.isAlive) {
+            this.#reset()
+        }
+    }
+
+    #calcWinLength() {
+        const res = (this.width * this.height) / (this.snake.w * this.snake.h) - this.snake.h
+        return res
+    }
+
+    #reset() {
+        this.score = 0
+        this.food = this.#spawnFood()
+        this.snake = this.#spawnSnake()
+    }
+
+    #spawnSnake() {
+        return new Snake(this, 240, 240)
     }
 
     #spawnFood() {
