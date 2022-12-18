@@ -11,6 +11,7 @@ export class Game {
         this.score = 0
         this.snake = this.#spawnSnake()
         this.food = this.#spawnFood()
+        this.freeSpaces = this.#getFreeSpaces()
         this.winCondition = this.#calcWinLength()
     }
 
@@ -26,7 +27,7 @@ export class Game {
     }
 
     draw() {
-        this.ctx.clearRect(0,0, this.width, this.height)
+        this.ctx.clearRect(0, 0, this.width, this.height)
         this.food.draw()
         this.snake.draw()
     }
@@ -49,9 +50,37 @@ export class Game {
         }
     }
 
-    #calcWinLength() {
-        const res = (this.width * this.height) / (this.snake.w * this.snake.h) - this.snake.h
+     #calcWinLength() {
+        const res = (this.width * this.height) / (this.snake.w * this.snake.h)
+        console.log(res)
         return res
+    }
+
+    #getFreeSpaces() {
+        const freeSpaces = []
+        const gameSize = (this.width * this.height) / (this.snake.w * this.snake.h)
+        if(this.snake.body.length <= 0) {
+            // First iteration; All spaces are free.
+            let x = 0
+            let y = 0
+            for(let i = 0; i < gameSize; i++) {
+                if(y >= this.height) break
+                if(x >= this.width) {
+                    y += 20
+                    x = 0
+                }
+                freeSpaces.push({x, y})
+                x += 20
+            }
+        } else {
+            // Game is running; Some spaces might be free.
+            if(freeSpaces === 0) {
+                // Snake has taken up all spaces - the game is won.
+            }
+        }
+        console.log(freeSpaces)
+        console.log(freeSpaces.length)
+        return freeSpaces
     }
 
     #reset() {
