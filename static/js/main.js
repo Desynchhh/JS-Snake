@@ -6,7 +6,6 @@ window.addEventListener('load', () => {
     canvas.height = 500
     canvas.width = 500
     
-    
     const game = new Game(ctx, canvas.width, canvas.height)
     let lastTime = 0
     const animate = timestamp => {
@@ -16,7 +15,7 @@ window.addEventListener('load', () => {
         game.draw()
         requestAnimationFrame(animate)
     }
-    
+
     window.addEventListener('keydown', e => {
         if(game.controlKeys.includes(e.key)) {
             game.addKeyPress(e.key)

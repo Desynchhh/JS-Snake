@@ -7,8 +7,7 @@ export class Snake {
     }
     constructor(game, x, y) {
         this.game = game
-        this.x = x
-        this.y = y
+        this.head = {x, y}
         this.h = 20
         this.w = this.h
         this.body = []
@@ -19,19 +18,17 @@ export class Snake {
         this.direction = this.directions.RIGHT
     }
 
-    
-
     #checkHitWall() {
-        if (this.y < 0) this.isAlive = false
-        else if (this.x > this.game.height - this.w) this.isAlive = false
-        else if (this.y + this.h > this.game.height) this.isAlive = false
-        else if (this.x < 0) this.isAlive = false
+        if (this.head.y < 0) this.isAlive = false
+        else if (this.head.x > this.game.width - this.w) this.isAlive = false
+        else if (this.head.y > this.game.height - this.h) this.isAlive = false
+        else if (this.head.x < 0) this.isAlive = false
     }
 
     #checkHitSelf() {
         for(let body of this.body) {
-            const xAlign = body.x == this.x
-            const yAlign = body.y == this.y
+            const xAlign = body.x == this.head.x
+            const yAlign = body.y == this.head.y
             if(xAlign && yAlign) {
                 this.isAlive = false
                 return
@@ -40,10 +37,10 @@ export class Snake {
     }
 
     move() {
-        if(this.direction == this.directions.UP) this.y -= this.stepSize
-        else if(this.direction == this.directions.RIGHT) this.x += this.stepSize
-        else if(this.direction == this.directions.DOWN) this.y += this.stepSize
-        else if(this.direction == this.directions.LEFT) this.x -= this.stepSize
+        if(this.direction == this.directions.UP) this.head.y -= this.stepSize
+        else if(this.direction == this.directions.RIGHT) this.head.x += this.stepSize
+        else if(this.direction == this.directions.DOWN) this.head.y += this.stepSize
+        else if(this.direction == this.directions.LEFT) this.head.x -= this.stepSize
     }
 
     setDirection(keys) {
@@ -73,8 +70,8 @@ export class Snake {
     }
 
     grow() {
-        const x = this.x
-        const y = this.y
+        const x = this.head.x
+        const y = this.head.y
         this.body.unshift({ x, y })
     }
 
@@ -82,24 +79,31 @@ export class Snake {
         this.setDirection(keys)
         this.timeSinceMove = this.timeSinceMove + dt
         if(this.timeSinceMove >= this.moveInterval) {
-            this.body.push({'x': this.x, 'y': this.y})
-            this.body.shift()
+            const hasBody = this.body.length > 0
+            if(hasBody) {
+                this.body.push({"x": this.head.x, "y": this.head.y})
+                this.body.shift()
+            }
             this.move()
             this.#checkHitSelf()
             this.#checkHitWall()
             this.game.checkReset()
             this.timeSinceMove = 0
+
         }
     }
     
     draw() {
         let fillStyle = '000000'
-        this.game.ctx.fillStyle = `#${fillStyle}`
-        this.game.ctx.fillRect(this.x, this.y, this.w, this.h)
+        this.game.ctx.fillStyle = this.#setFillStyle(fillStyle)
+        this.game.ctx.fillRect(this.head.x, this.head.y, this.w, this.h)
         for(const body of this.body) {
-            console.log(fillStyle)
             this.game.ctx.fillRect(body.x, body.y, this.w, this.h)
         }
+    }
+
+    #setFillStyle(fillStyle) {
+        return `#${fillStyle}`
     }
 }
 
