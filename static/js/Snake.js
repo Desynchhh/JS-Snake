@@ -8,13 +8,14 @@ export class Snake {
     constructor(game, x, y) {
         this.game = game
         this.head = {x, y}
-        this.h = 20
-        this.w = this.h
+        this.h = this.game.unit
+        this.w = this.game.unit
         this.body = []
         this.timeSinceMove = 0
         this.moveInterval = 100
         this.isAlive = true
         this.stepSize = this.h
+        this.lastMovedTowards = this.directions.RIGHT
         this.direction = this.directions.RIGHT
     }
 
@@ -37,34 +38,46 @@ export class Snake {
     }
 
     move() {
-        if(this.direction == this.directions.UP) this.head.y -= this.stepSize
-        else if(this.direction == this.directions.RIGHT) this.head.x += this.stepSize
-        else if(this.direction == this.directions.DOWN) this.head.y += this.stepSize
-        else if(this.direction == this.directions.LEFT) this.head.x -= this.stepSize
+        if(this.direction == this.directions.UP) this.head.y -= this.game.unit
+        else if(this.direction == this.directions.RIGHT) this.head.x += this.game.unit
+        else if(this.direction == this.directions.DOWN) this.head.y += this.game.unit
+        else if(this.direction == this.directions.LEFT) this.head.x -= this.game.unit
+    }
+
+    #attemptToSetDirection(key, directionArray, desiredDirection) {
+        if(directionArray.includes(key)) {
+            const oppositeDirection = this.direction * -1
+            if(desiredDirection != oppositeDirection && this.lastMovedTowards == this.direction) {
+                this.direction = desiredDirection
+                return true
+            }
+        }
+        return false
     }
 
     setDirection(keys) {
         if(keys.length > 0) {
             const key = keys[keys.length-1]
-            switch(key) {
-                case 'ArrowUp':
-                case 'w':
-                    this.direction = this.directions.UP
-                    break;
-                case 'ArrowRight':
-                case 'd':
-                    this.direction = this.directions.RIGHT
-                    break;
-                case 'ArrowDown':
-                case 's':
-                    this.direction = this.directions.DOWN
-                    break;
-                case 'ArrowLeft':
-                case 'a':
-                    this.direction = this.directions.LEFT
-                    break;
-                default:
-                    break;   
+            const options = [
+                {
+                    'directionArray': this.game.moveUp,
+                    'directionToMove': this.directions.UP
+                },
+                {
+                    'directionArray': this.game.moveRight,
+                    'directionToMove': this.directions.RIGHT
+                },
+                {
+                    'directionArray': this.game.moveDown,
+                    'directionToMove': this.directions.DOWN
+                },
+                {
+                    'directionArray': this.game.moveLeft,
+                    'directionToMove': this.directions.LEFT
+                }
+            ]
+            for(let option of options) {
+                if(this.#attemptToSetDirection(key, option.directionArray, option.directionToMove)) break
             }
         }
     }
@@ -88,8 +101,8 @@ export class Snake {
             this.#checkHitSelf()
             this.#checkHitWall()
             this.game.checkReset()
+            this.lastMovedTowards = this.direction
             this.timeSinceMove = 0
-
         }
     }
     
@@ -100,6 +113,11 @@ export class Snake {
         for(const body of this.body) {
             this.game.ctx.fillRect(body.x, body.y, this.w, this.h)
         }
+    }
+
+    getAllSnakeParts() {
+        const snakeHead = {'x': this.head.x, 'y': this.head.y}
+        return [snakeHead, ...this.body]
     }
 
     #setFillStyle(fillStyle) {

@@ -2,10 +2,15 @@ import {Snake} from './Snake.js'
 import {Food} from './Food.js'
 
 export class Game {
-    controlKeys = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', 'w', 'd', 's', 'a']
+    moveUp = ['ArrowUp', 'w']
+    moveRight = ['ArrowRight', 'd']
+    moveDown = ['ArrowDown', 's']
+    moveLeft = ['ArrowLeft', 'a']
+    controlKeys = [...this.moveUp, ...this.moveRight, ...this.moveDown, ...this.moveLeft]
     constructor(ctx, width, height) {
-        this.width = width
-        this.height = height
+        this.unit = 20
+        this.width = width - (width % this.unit)
+        this.height = height - (height % this.unit)
         this.ctx = ctx
         this.keys = []
         this.score = 0
@@ -14,23 +19,18 @@ export class Game {
         this.totalSpaces = this.spaces.length
         // this.winCondition = this.#calcWinLength()
         this.food = this.#spawnFood()
+        console.log(this.width, this.height)
     }
 
     update(dt) {
-        this.spaces = this.#getSpaces()
-        const snakeHead = {'x': this.snake.head.x, 'y': this.snake.head.y}
-        const totalSnake = [snakeHead, ...this.snake.body]
-        for(let body of totalSnake) {
-            this.#occupySpaces(body.x, body.y)
-        }
+        this.#updateSpaces()
         if(this.snake.head.x == this.food.x && this.snake.head.y == this.food.y) {
             this.score += 10
             this.snake.grow()
             console.log('score:', this.score)
             this.food = this.#spawnFood()
         }
-        
-        [this.food, this.snake].forEach(obj => obj.update(dt, this.keys))
+        this.#updateGameObjects(dt)
     }
 
     draw() {
@@ -58,8 +58,20 @@ export class Game {
     }
 
      #calcWinLength() {
-        const res = (this.width * this.height) / (this.snake.w * this.snake.h)
+        const res = (this.width * this.height) / (this.unit * this.unit)
         return res
+    }
+
+    #updateSpaces() {
+        this.spaces = this.#getSpaces()
+        const snakeParts = this.snake.getAllSnakeParts()
+        for(let snakePart of snakeParts) {
+            this.#occupySpaces(snakePart.x, snakePart.y)
+        }
+    }
+
+    #updateGameObjects(dt) {
+        [this.food, this.snake].forEach(obj => obj.update(dt, this.keys))
     }
 
     #getSpaces() {
@@ -69,9 +81,9 @@ export class Game {
         while(y < this.height) {
             if(x < this.width) {
                 spaces.push({x, y})
-                x += this.snake.w
+                x += this.unit
             } else {
-                y += this.snake.h
+                y += this.unit
                 x = 0
             }
         }
